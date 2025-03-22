@@ -1,0 +1,20 @@
+FROM python:3.10
+
+WORKDIR /app/GoLink
+
+RUN git clone https://github.com/Z3Prover/z3.git && \
+    cd z3 && \
+    python3 scripts/mk_make.py && \
+    cd build && \
+    make -j16 && \
+    make install && \
+    echo "export LD_LIBRARY_PATH=/app/GoLink/z3/build/" >> ~/.bashrc && \
+    source ~/.bashrc && \
+    ln -s /app/GoLink/z3/build/libz3.so /app/GoLink/z3/build/libz3.so.4 && \
+    cd /app/GoLink
+
+COPY ./Go_Example/example.go ./Go_Example/example.go
+COPY ./GoLink .
+COPY ./GoLink_z3 .
+
+# ./GoLink -baseName=Go_Example -projectDir=./Go_Example -database_ip=172.17.0.4

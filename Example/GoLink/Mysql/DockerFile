@@ -1,0 +1,8 @@
+FROM mysql:8.4.2
+
+ENV MYSQL_DATABASE=golink \
+    MYSQL_ROOT_PASSWORD=123456
+
+COPY ./Example_Data/*.sql /docker-entrypoint-initdb.d/
+
+EXPOSE 3306

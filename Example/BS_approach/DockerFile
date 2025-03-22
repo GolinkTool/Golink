@@ -1,0 +1,12 @@
+FROM golang:latest
+
+# install python3 and pip
+RUN apt-get update && apt-get install -y python3 python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY ./../Go_Example /app/Go_Example
+COPY ./BS_approach/BS_approach.py /app/Go_Example
+
+WORKDIR /app/Go_Example
+
+CMD ["python3", "BS_approach.py"]

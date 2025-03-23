@@ -1,6 +1,6 @@
 # GoLink Overview
 
-## Files and directories Description
+## Directories Description
 
 **GoLink** directory contains GoLink's project code.
 

@@ -7,9 +7,9 @@ import argparse
 import json
 from packaging.version import Version, InvalidVersion
 '''
-This script is used to obtain the correct version of the target project by using the binary search method.
+This script is used to obtain the correct version of the target project by using the backtracking search method.
 The method doesn't specify the error dependency, instead it extracts the target error dependency from the error log.
-Then go through the tags of the target project to find the correct version.
+Then backtrack the tags of the target tpl to find the correct version.
 '''
 
 def execute_command(name, *args, timeout=1200):

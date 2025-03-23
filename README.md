@@ -7,4 +7,4 @@
 **Example** directory contains the examples for GoLink and baselines.
 We have prepared a **DockerFile** to enable quick and reproducible builds.
 
-**ReportData** directory contains reports on the usefulness chapters.
+**ReportData** directory contains reports on the usefulness.

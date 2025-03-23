@@ -1,4 +1,4 @@
-# Golink Setup and Build Instructions
+# BS_approach Setup and Build Instructions
 
 This document outlines the steps to build and run the BS_approach containers for the Go project. Follow the steps carefully to set up the environment and execute the program.
 

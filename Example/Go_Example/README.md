@@ -2,7 +2,7 @@
 
 ## Description
 
-While reproducing the project, we found that the build process fails **due to mismatched or unresolved dependencies.**
+While migrating the project from GoPath to Go Modules, we found that the build process fails **due to mismatched or unresolved dependencies.**
 
 The following error log was produced during the build process:
 

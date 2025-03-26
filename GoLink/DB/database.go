@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -15,25 +16,100 @@ var (
 	err    error
 )
 
-//func init() {
-//	DbConn, err = sql.Open("mysql", "golink:123456@tcp("+DatabaseIp+":3306)/golink?charset=utf8")
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//
-//	DbConn.SetMaxOpenConns(200)
-//
-//	DbConn.SetMaxIdleConns(20)
-//
-//	DbConn.SetConnMaxLifetime(5 * time.Minute)
-//
-//	if err := DbConn.Ping(); err != nil {
-//		fmt.Println("open DB fail")
-//		fmt.Println(err)
-//	} else {
-//		fmt.Println("open DB SUCCESS!")
-//	}
-//}
+func init() {
+	DbConn, err = sql.Open("mysql", "root:123456@tcp(127.0.0.1:3306)/GOLINK?charset=utf8")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	DbConn.SetMaxOpenConns(200)
+
+	DbConn.SetMaxIdleConns(20)
+
+	DbConn.SetConnMaxLifetime(5 * time.Minute)
+
+	if err := DbConn.Ping(); err != nil {
+		fmt.Println("open DB fail")
+	}
+
+	fmt.Println("open DB SUCCESS!")
+}
+
+func QueryOptVersion(pkgId []int) map[int]int {
+	var res = make(map[int]int)
+	for _, id := range pkgId {
+		pkgName := QueryPackageName(id)
+		optVer, _ := QueryVersionMPMatch(id, pkgName)
+		// choose the closest Version
+		if len(optVer) > 0 {
+			res[id] = optVer[len(optVer)-1]
+		}
+	}
+	return res
+}
+
+func QueryVersionMPMatch(pkgId int, pkgName string) ([]int, error) {
+	query := `
+        SELECT version_id
+        FROM package_url 
+        WHERE package_id = ? and module_path = ?
+    `
+
+	rows, err := DbConn.Query(query, pkgId, pkgName)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	//var results []map[string]interface{}
+	var result []int
+	for rows.Next() {
+		var packageVersionId int
+
+		if err := rows.Scan(&packageVersionId); err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		// Construct rowData map with appropriate checks for NULL values
+		/*rowData := map[string]interface{}{
+			"package_version_id": nilIfNull(packageVersionId),
+		}*/
+		result = append(result, packageVersionId)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
+
+	return result, nil
+}
+
+func QueryPackageName(PkgId int) string {
+	PackageName := ""
+	stmtOut, err := DbConn.Prepare("SELECT package_name FROM go_packages WHERE id = ?")
+	if err != nil {
+		fmt.Errorf("QueryPackageName failed: %v", err)
+		return ""
+	}
+	defer stmtOut.Close()
+
+	rows, err := stmtOut.Query(PkgId)
+	if err != nil {
+		fmt.Errorf("QueryPackageName failed: %v", err)
+		return ""
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+
+		if err := rows.Scan(&PackageName); err != nil {
+			fmt.Errorf("QueryPackageName failed: %v", err)
+			return ""
+		}
+	}
+
+	return PackageName
+}
 
 func QueryPackageId(PackageName string) int {
 	PackageId := 0

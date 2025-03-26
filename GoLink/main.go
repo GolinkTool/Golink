@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"github.com/GoLink/GoLink/DB"
@@ -20,8 +19,11 @@ var expressionFile string
 func SolverDeps(directDeps map[int]string, optDeps map[int]int) []string {
 
 	var requireDeps []string
-	smtStmts, _ := smt.GenerateSMTStmt(directDeps)
+	smtStmts, pkgId := smt.GenerateSMTStmt(directDeps)
 	//fmt.Println(pkgId)
+
+	optDeps = DB.QueryOptVersion(pkgId)
+	//fmt.Println(optDeps)
 
 	err := utils.WriteToFile(smtStmts, expressionFile)
 	if err != nil {
@@ -61,36 +63,13 @@ func SolverDeps(directDeps map[int]string, optDeps map[int]int) []string {
 	return requireDeps
 }
 
-var (
-	baseName   = flag.String("baseName", "Go_Example", "full project name")
-	rootPkgDir = flag.String("projectDir", "./", "Your project Directory")
-	DatabaseIp = flag.String("database_ip", "127.0.0.1", "database ip")
-	err        error
-)
-
-func init() {
-	flag.Parse()
-	DB.DbConn, err = sql.Open("mysql", "golink:123456@tcp("+*DatabaseIp+":3306)/golink?charset=utf8")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	DB.DbConn.SetMaxOpenConns(200)
-
-	DB.DbConn.SetMaxIdleConns(20)
-
-	DB.DbConn.SetConnMaxLifetime(5 * time.Minute)
-
-	if err := DB.DbConn.Ping(); err != nil {
-		fmt.Println("open DB fail")
-		fmt.Println(err)
-	} else {
-		fmt.Println("open DB SUCCESS!")
-	}
-}
-
 func main() {
 	// ./GoLink -baseName=Example/Go_Example -projectDir=../Example/Go_Example
+	var baseName = flag.String("baseName", "github.com/ofesseler/gluster_exporter", "full project name")
+	var rootPkgDir = flag.String("projectDir", "../Example/ofesseler/gluster_exporter", "Your project Directory")
+
+	flag.Parse()
+
 	expressionFile = "./expression.txt"
 	fmt.Printf("ProjectDir: %s\n", *rootPkgDir)
 	fmt.Printf("BaseName: %s\n", *baseName)
